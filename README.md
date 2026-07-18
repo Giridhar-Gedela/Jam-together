@@ -1,4 +1,4 @@
-# 🎵 iPlay - Social Music Streaming Platform
+# 🎵 JamTogether - Social Music Streaming Platform
 
 <div align="center">
   <img src="https://img.shields.io/badge/React-18.2.0-blue?style=for-the-badge&logo=react" alt="React">
@@ -66,7 +66,6 @@
 ```bash
 node -v  # v18.0.0 or higher
 npm -v   # v8.0.0 or higher
-```
 
 ### 1. Clone the Repository
 ```bash
