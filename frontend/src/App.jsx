@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from "socket.io-client";
 
 // --- DEFINE YOUR SINGLE SOURCE OF TRUTH FOR THE BACKEND URL ---
-const BACKEND_URL = "https://music-64ne.onrender.com";
+const BACKEND_URL = "https://jam-together-2tcx.onrender.com";
 
 // --- STYLES ---
 const GlobalStyles = () => (
