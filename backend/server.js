@@ -5,29 +5,27 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const http = require("http");
 const { Server } = require("socket.io");
+require("dotenv").config();
 
 // ================= CONFIG =================
 
-// Frontend URLs
-const allowedOrigins = [
-  "https://jam-together.vercel.app",
-  "http://localhost:5173",
-  "https://parassoni0.github.io/music",
-  "http://eshwarkrishna.me",
-  "https://eshwarkrishna.me",
-];
-
-// Replace these with environment variables later
-const MONGO_URI =
-  "mongodb+srv://test:703vr9FJwzKmfc4h@hack.8syianl.mongodb.net/hack";
-
-const JWT_SECRET =
-  "your-super-secret-key-that-is-very-long-and-random";
-
-// ================= APP =================
-
 const app = express();
 const server = http.createServer(app);
+
+const PORT = process.env.PORT || 3001;
+const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://jam-together.vercel.app",
+  "https://jam-together-2tcx.onrender.com",
+  "https://parassoni0.github.io/music",
+  "http://eshwarkrishna.me",
+  "https://eshwarkrishna.me"
+];
+
+// ================= CORS =================
 
 const corsOptions = {
   origin: function (origin, callback) {
@@ -37,7 +35,7 @@ const corsOptions = {
       callback(new Error("CORS Not Allowed"));
     }
   },
-  credentials: true,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -45,10 +43,8 @@ app.options("*", cors(corsOptions));
 app.use(express.json());
 
 const io = new Server(server, {
-  cors: corsOptions,
+  cors: corsOptions
 });
-
-const PORT = process.env.PORT || 3001;
 
 // ================= DATABASE =================
 
@@ -89,20 +85,22 @@ const favoriteSchema = new mongoose.Schema({
 });
 
 favoriteSchema.index(
-  { userId: 1, trackId: 1 },
-  { unique: true }
+  {
+    userId: 1,
+    trackId: 1,
+  },
+  {
+    unique: true,
+  }
 );
 
 const User = mongoose.model("User", userSchema);
-const Favorite = mongoose.model(
-  "Favorite",
-  favoriteSchema
-);
+const Favorite = mongoose.model("Favorite", favoriteSchema);
 
 // ================= HEALTH =================
 
 app.get("/", (req, res) => {
-  res.send("Backend Running");
+  res.send("Music App Backend is running!");
 });
 
 // ================= AUTH =================
@@ -112,23 +110,18 @@ app.post("/api/auth/signup", async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password)
-      return res
-        .status(400)
-        .json({ message: "Username & Password required" });
+      return res.status(400).json({
+        message: "Username and Password required",
+      });
 
-    const existingUser = await User.findOne({
-      username,
-    });
+    const existingUser = await User.findOne({ username });
 
     if (existingUser)
-      return res
-        .status(409)
-        .json({ message: "User already exists" });
+      return res.status(409).json({
+        message: "Username already exists",
+      });
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      12
-    );
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = new User({
       username,
@@ -152,34 +145,28 @@ app.post("/api/auth/signin", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const user = await User.findOne({
-      username,
-    });
+    const user = await User.findOne({ username });
 
     if (!user)
-      return res
-        .status(404)
-        .json({ message: "User Not Found" });
+      return res.status(404).json({
+        message: "User not found",
+      });
 
-    const correctPassword =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
+    const isCorrect = await bcrypt.compare(password, user.password);
 
-    if (!correctPassword)
-      return res
-        .status(400)
-        .json({ message: "Invalid Password" });
+    if (!isCorrect)
+      return res.status(400).json({
+        message: "Invalid Credentials",
+      });
 
     const token = jwt.sign(
       {
-        username: user.username,
         id: user._id,
+        username: user.username,
       },
       JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "24h",
       }
     );
 
@@ -202,24 +189,20 @@ app.post("/api/auth/signin", async (req, res) => {
 
 const auth = (req, res, next) => {
   try {
-    const token =
-      req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token)
       return res.status(401).json({
-        message: "Authentication Failed",
+        message: "No Token",
       });
 
-    const decoded = jwt.verify(
-      token,
-      JWT_SECRET
-    );
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     req.userId = decoded.id;
 
     next();
   } catch (err) {
-    res.status(401).json({
+    return res.status(401).json({
       message: "Invalid Token",
     });
   }
@@ -233,12 +216,11 @@ app.get("/api/favorites", auth, async (req, res) => {
       userId: req.userId,
     });
 
-    res.json(
-      favorites.map((f) => f.trackData)
-    );
+    res.json(favorites.map((fav) => fav.trackData));
   } catch (err) {
+    console.log(err);
     res.status(500).json({
-      message: "Error fetching favorites",
+      message: "Error Fetching Favorites",
     });
   }
 });
@@ -257,40 +239,39 @@ app.post("/api/favorites", auth, async (req, res) => {
 
     res.status(201).json(track);
   } catch (err) {
-    if (err.code === 11000) {
+    if (err.code === 11000)
       return res.status(409).json({
-        message: "Already Exists",
+        message: "Already Added",
       });
-    }
+
+    console.log(err);
 
     res.status(500).json({
-      message: "Failed",
+      message: "Error",
     });
   }
 });
 
-app.delete(
-  "/api/favorites/:trackId",
-  auth,
-  async (req, res) => {
-    try {
-      await Favorite.deleteOne({
-        userId: req.userId,
-        trackId: req.params.trackId,
-      });
+app.delete("/api/favorites/:trackId", auth, async (req, res) => {
+  try {
+    await Favorite.deleteOne({
+      userId: req.userId,
+      trackId: req.params.trackId,
+    });
 
-      res.json({
-        message: "Removed",
-      });
-    } catch (err) {
-      res.status(500).json({
-        message: "Delete Failed",
-      });
-    }
+    res.json({
+      message: "Removed",
+    });
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Error",
+    });
   }
-);
+});
 
-// ================= SOCKET =================
+// ================= SOCKET.IO =================
 
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
@@ -299,26 +280,20 @@ io.on("connection", (socket) => {
     socket.join(sessionId);
 
     socket.to(sessionId).emit("user_joined", {
-      user: "A user",
-      text: "joined the room",
+      text: "A user joined",
     });
   });
 
   socket.on("playback_control", (data) => {
-    socket
-      .to(data.sessionId)
-      .emit("update_playback", data);
+    socket.to(data.sessionId).emit("update_playback", data);
   });
 
   socket.on("chat_message", (data) => {
-    io.to(data.sessionId).emit(
-      "new_message",
-      data
-    );
+    io.to(data.sessionId).emit("new_message", data);
   });
 
   socket.on("disconnect", () => {
-    console.log("Disconnected");
+    console.log("Disconnected:", socket.id);
   });
 });
 
