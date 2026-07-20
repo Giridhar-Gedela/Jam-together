@@ -333,31 +333,23 @@ new_message
 
 ## Home
 
-_Add Screenshot_
+<img width="1917" height="1037" alt="image" src="https://github.com/user-attachments/assets/cc52a868-9398-493f-9f43-66829ec20852" />
+
 
 ---
 
 ## Music Player
 
-_Add Screenshot_
+<img width="1917" height="936" alt="image" src="https://github.com/user-attachments/assets/b77c0d49-d892-4873-9807-f9cd9cc210d2" />
+
 
 ---
 
-## Listen Together
-
-_Add Screenshot_
-
----
-
-## Chat
-
-_Add Screenshot_
-
----
 
 ## Favorites
 
-_Add Screenshot_
+<img width="1910" height="936" alt="image" src="https://github.com/user-attachments/assets/f7224c40-a435-46e1-a5e4-d1d6c43c192b" />
+
 
 ---
 
@@ -432,7 +424,7 @@ https://github.com/Giridhar-Gedela
 
 LinkedIn
 
-(Add your LinkedIn URL)
+https://www.linkedin.com/in/giridhargedela/
 
 ---
 
